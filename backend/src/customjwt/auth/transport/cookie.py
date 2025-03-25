@@ -1,14 +1,15 @@
 from typing import Literal, Optional
 from fastapi import Response, Request
+from customjwt.config import config
 
 
 class CookieTransport:
     def __init__(
         self,
-        name_jwt_access: str,
-        name_jwt_refresh: str,
-        max_age_access: int,
-        max_age_refresh: int,
+        name_jwt_access: str = config.jwt_access_cookie_name,
+        name_jwt_refresh: str = config.jwt_refresh_cookie_name,
+        max_age_access: int = config.jwt_access_cookie_max_age,
+        max_age_refresh: int = config.jwt_refresh_cookie_max_age,
         path: str = "/",
         domain: str | None = None,
         secure: bool = True,

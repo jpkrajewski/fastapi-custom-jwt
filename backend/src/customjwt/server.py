@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from customjwt.routes import router
 
 
 def create_app():

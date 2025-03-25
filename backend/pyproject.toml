@@ -1,10 +1,11 @@
 [project]
-name = "fastapi-custom-jwt"
+name = "customjwt"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.115.11",
+    "fastapi[standard]>=0.115.11",
+    "pydantic-settings>=2.8.1",
     "pyjwt>=2.10.1",
 ]

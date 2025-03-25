@@ -1,17 +1,17 @@
 from datetime import datetime, timedelta, timezone
-from math import e
 from uuid import uuid4
 import jwt
+from customjwt.config import config
 
 
 class JwtBackend:
     def __init__(
         self,
-        secret_key: str,
-        algorithm: str,
-        lifetime_seconds_access: int,
-        lifetime_seconds_refresh: int,
-        issuer: str,
+        secret_key: str = config.secret_key,
+        algorithm: str = config.algorithm,
+        lifetime_seconds_access: int = config.lifetime_seconds_access,
+        lifetime_seconds_refresh: int = config.lifetime_seconds_refresh,
+        issuer: str = config.issuer,
     ):
         self.secret_key = secret_key
         self.algorithm = algorithm
@@ -19,7 +19,7 @@ class JwtBackend:
         self.lifetime_seconds_refresh = lifetime_seconds_refresh
         self.issuer = issuer
 
-    def write_access_token(self, sub: str):
+    def write_access_token(self, sub: str, scope: list):
         iat = datetime.now(tz=timezone.utc)
         exp = iat + timedelta(seconds=self.lifetime_seconds_access)
         jti = str(uuid4())
@@ -30,6 +30,7 @@ class JwtBackend:
                 "exp": exp,
                 "iat": iat,
                 "jti": jti,
+                "scope": scope,
             },
             key=self.secret_key,
             algorithm=self.algorithm,
@@ -51,13 +52,18 @@ class JwtBackend:
         )
         return token
 
-    def read_token(self, token: str) -> dict:
-        return self._decode(token)
+    def read_token(self, token: str, /, raises: bool = False) -> dict:
+        payload = self._decode(token)
+        if not payload:
+            if raises:
+                raise ValueError("Invalid token")
+            return {}
+        return payload
 
     def validate_token(self, token: str) -> bool:
         return bool(self._decode(token))
 
-    def _decode(self, token: str) -> dict:
+    def _decode(self, token: str) -> dict | None:
         try:
             decoded = jwt.decode(
                 token,
@@ -71,5 +77,5 @@ class JwtBackend:
                 },
             )
             return decoded
-        except jwt.InvalidTokenError:
-            return {}
+        except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
+            return None

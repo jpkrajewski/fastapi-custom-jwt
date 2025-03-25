@@ -12,8 +12,8 @@ class AuthService:
         self._backend = backend
         self._transport = transport
 
-    def login(self, response: Response, sub: str) -> None:
-        access_token = self._backend.write_access_token(sub)
+    def login(self, response: Response, sub: str, scope: list) -> None:
+        access_token = self._backend.write_access_token(sub, scope)
         refresh_token = self._backend.write_refresh_token(sub)
         self._transport.login_response(
             response,
@@ -42,17 +42,6 @@ class AuthService:
 
 
 auth = AuthService(
-    backend=JwtBackend(
-        secret_key="secret",
-        algorithm="HS256",
-        lifetime_seconds_access=60,
-        lifetime_seconds_refresh=300,
-        issuer="customjwt",
-    ),
-    transport=CookieTransport(
-        name_jwt_access="access_token",
-        name_jwt_refresh="refresh_token",
-        max_age_access=60,
-        max_age_refresh=300,
-    ),
+    backend=JwtBackend(),
+    transport=CookieTransport(),
 )
